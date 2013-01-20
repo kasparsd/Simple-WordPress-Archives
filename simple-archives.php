@@ -63,10 +63,10 @@ function taxonomy_archive( $atts = array() ) {
 			$term = $terms[ $term_taxonomy_ids[ $term_taxonomy_id ] ];
 
 			$term_replace = array(
-					'%term_name%' => apply_filters( 'taxonomy_archive_term_name', $term->name, $term ),
+					'%term_name%' => esc_html( $term->name ),
 					'%term_id%' => $term->term_id,
 					'%term_slug%' => $term->slug,
-					'%items%' => implode( '', $posts)
+					'%items%' => implode( '', $posts )
 				);
 
 			$html[] = str_replace( array_keys( $term_replace ), array_values( $term_replace ), $template_items );
