@@ -3,7 +3,7 @@
 Plugin Name: Simple Archives
 Plugin URI: https://github.com/kasparsd/Simple-WordPress-Archives
 Description: Provides a few shortcodes for listing post archives grouped by categories or taxonomies
-Version: 0.2
+Version: 0.3
 Author: Kaspars Dambis
 Author URI: http://konstruktros.com
 */
@@ -37,7 +37,7 @@ function taxonomy_archive( $atts = array() ) {
 		$term_taxonomy_ids[$term->term_taxonomy_id] = $term->term_id;
 	}
 	
-	$posts = query_posts( array( 
+	$q = new WP_Query( array( 
 			'posts_per_page' => -1,
 			'post_type' => $post_type,
 			'category__in' => array_keys( $terms ),
@@ -45,8 +45,8 @@ function taxonomy_archive( $atts = array() ) {
 			'taxonomy_archive_shortcode' => true
 		));
 
-	if ( have_posts() ) :
-		while ( have_posts() ) : the_post();
+	if ( $q->have_posts() ) :
+		while ( $q->have_posts() ) : $q->the_post();
 			
 			$item_replace = array(
 					'%the_title%' => get_the_title(),
@@ -56,28 +56,6 @@ function taxonomy_archive( $atts = array() ) {
 
 			$item_replace = apply_filters( 'taxonomy_archive_replace_item', $item_replace, $post );
 			$items[ $post->term_taxonomy_id ][] = str_replace( array_keys( $item_replace ), array_values( $item_replace ), $template_item );
-			
-			/*
-			if ( ( $counter > 1 && $prev_term_taxonomy_id != $post->term_taxonomy_id ) || count( $posts ) == $counter ) {
-				// Convert term_taxonomy_id into term_id and get the name
-				$previous_term = $terms[ $term_taxonomy_ids[ $prev_term_taxonomy_id ] ];
-				
-				$items_replace = array(
-						'%term_name%' => apply_filters( 'taxonomy_archive_term_name', $previous_term->name, $previous_term ),
-						'%term_id%' => $prev_term_id,
-						'%the_permalink%' => get_permalink(),
-						'%items%' => $items_prev
-					);
-
-				if ( count( $posts ) == $counter )
-					$items_replace['%items%'] = $items;
-
-				$items_replace = apply_filters( 'taxonomy_archive_replace_item', $items_replace, $post );
-				$html .= str_replace( array_keys( $items_replace ), array_values( $items_replace ), $template_items );
-
-				$items = '';
-			}
-			*/
 
 		endwhile;
 
@@ -97,8 +75,6 @@ function taxonomy_archive( $atts = array() ) {
 		return str_replace( '%terms%', implode( '', $html ), $template_terms );
 
 	endif;
-
-	wp_reset_query();
 }
 
 // Don't group posts by ID, because we want to add even repeat posts
