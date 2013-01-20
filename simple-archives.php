@@ -94,7 +94,7 @@ function taxonomy_archive( $atts = array() ) {
 			$html[] = str_replace( array_keys( $term_replace ), array_values( $term_replace ), $template_items );
 		}
 	
-		echo str_replace( '%terms%', implode( '', $html ), $template_terms );
+		return str_replace( '%terms%', implode( '', $html ), $template_terms );
 
 	endif;
 
