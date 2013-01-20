@@ -2,6 +2,11 @@
 
 Create an archive page of all your posts organized and grouped by a term they are in.
 
+## Screenshot
+
+![Screenshot of Taxonomy Archives plugin for WordPress](https://raw.github.com/kasparsd/Simple-WordPress-Archives/master/screenshot.png)
+
+
 ## Usage
 
 Use this shortcode where you wish to render the archive:
