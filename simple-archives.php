@@ -3,7 +3,7 @@
 Plugin Name: Simple Archives
 Plugin URI: https://github.com/kasparsd/Simple-WordPress-Archives
 Description: Provides a few shortcodes for listing post archives grouped by categories or taxonomies
-Version: 0.1
+Version: 0.2
 Author: Kaspars Dambis
 Author URI: http://konstruktros.com
 */
@@ -16,10 +16,8 @@ function taxonomy_archive( $atts = array() ) {
 
 	$terms = array();
 	$term_taxonomy_ids = array();
-	$items = '';
-	$html = '';
-	$prev_term_taxonomy_id = '';
-	$counter = 1;
+	$items = array();
+	$html = array();
 
 	extract( shortcode_atts( array(
 		'post_type' => 'post',
@@ -57,8 +55,9 @@ function taxonomy_archive( $atts = array() ) {
 				);
 
 			$item_replace = apply_filters( 'taxonomy_archive_replace_item', $item_replace, $post );
-			$items .= str_replace( array_keys( $item_replace ), array_values( $item_replace ), $template_item );
+			$items[ $post->term_taxonomy_id ][] = str_replace( array_keys( $item_replace ), array_values( $item_replace ), $template_item );
 			
+			/*
 			if ( ( $counter > 1 && $prev_term_taxonomy_id != $post->term_taxonomy_id ) || count( $posts ) == $counter ) {
 				// Convert term_taxonomy_id into term_id and get the name
 				$previous_term = $terms[ $term_taxonomy_ids[ $prev_term_taxonomy_id ] ];
@@ -78,19 +77,24 @@ function taxonomy_archive( $atts = array() ) {
 
 				$items = '';
 			}
-
-			$prev_term_taxonomy_id = $post->term_taxonomy_id;
-			$items_prev = $items;
-
-			$counter++;
+			*/
 
 		endwhile;
 
-		$replace = array(
-				'%terms%' => $html
-			);
+		foreach ( $items as $term_taxonomy_id => $posts ) {
+			$term = $terms[ $term_taxonomy_ids[ $term_taxonomy_id ] ];
+
+			$term_replace = array(
+					'%term_name%' => apply_filters( 'taxonomy_archive_term_name', $term->name, $term ),
+					'%term_id%' => $term->term_id,
+					'%term_slug%' => $term->slug,
+					'%items%' => implode( '', $posts)
+				);
+
+			$html[] = str_replace( array_keys( $term_replace ), array_values( $term_replace ), $template_items );
+		}
 	
-		echo str_replace( array_keys( $replace ), array_values( $replace ), $template_terms );		
+		echo str_replace( '%terms%', implode( '', $html ), $template_terms );
 
 	endif;
 
